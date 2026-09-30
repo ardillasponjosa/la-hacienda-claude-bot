@@ -1,12 +1,17 @@
 const express = require("express");
+const Anthropic = require("@anthropic-ai/sdk");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Permite recibir JSON de Meta y otras APIs.
 app.use(express.json());
 
-// Ruta de prueba para comprobar que el servidor está funcionando.
+// Conexión con Claude
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+});
+
+// Ruta principal
 app.get("/", (req, res) => {
   res.status(200).json({
     ok: true,
@@ -15,8 +20,36 @@ app.get("/", (req, res) => {
   });
 });
 
-// Verificación de Webhook de Meta.
-// Más adelante configuraremos META_VERIFY_TOKEN en Render.
+// Prueba de conexión con Claude
+app.get("/claude", async (req, res) => {
+  try {
+    const message = await anthropic.messages.create({
+      model: "claude-3-5-haiku-latest",
+      max_tokens: 300,
+      messages: [
+        {
+          role: "user",
+          content: "Hola Claude, responde brevemente confirmando que estás conectado con el asistente de La Hacienda de Villa."
+        }
+      ]
+    });
+
+    res.json({
+      ok: true,
+      response: message.content[0].text
+    });
+
+  } catch (error) {
+    console.error("Error de Claude:", error);
+
+    res.status(500).json({
+      ok: false,
+      error: "No se pudo conectar con Claude."
+    });
+  }
+});
+
+// Verificación del Webhook de Meta
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -33,11 +66,13 @@ app.get("/webhook", (req, res) => {
   return res.sendStatus(403);
 });
 
-// Aquí recibiremos posteriormente los mensajes de Instagram/Facebook.
+// Recepción de mensajes de Meta
 app.post("/webhook", (req, res) => {
-  console.log("Webhook recibido:", JSON.stringify(req.body, null, 2));
+  console.log(
+    "Webhook recibido:",
+    JSON.stringify(req.body, null, 2)
+  );
 
-  // Respondemos rápidamente a Meta.
   res.sendStatus(200);
 });
 
