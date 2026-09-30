@@ -8,7 +8,10 @@ app.use(express.json());
 
 // Conexión con Claude
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  headers: {
+    "anthropic-workspace-id": process.env.ANTHROPIC_WORKSPACE_ID
+  }
 });
 
 // Ruta principal
