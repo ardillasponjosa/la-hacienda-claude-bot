@@ -23,6 +23,28 @@ app.get("/", (req, res) => {
   });
 });
 
+// Ver modelos disponibles
+app.get("/models", async (req, res) => {
+  try {
+    const models = await anthropic.models.list();
+
+    res.json({
+      ok: true,
+      models: models.data.map(model => ({
+        id: model.id,
+        name: model.display_name
+      }))
+    });
+  } catch (error) {
+    console.error("Error obteniendo modelos:", error);
+
+    res.status(500).json({
+      ok: false,
+      error: "No se pudieron obtener los modelos."
+    });
+  }
+});
+
 // Prueba de conexión con Claude
 app.get("/claude", async (req, res) => {
   try {
