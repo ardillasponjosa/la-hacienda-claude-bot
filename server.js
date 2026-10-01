@@ -48,7 +48,8 @@ app.get("/models", async (req, res) => {
 // Prueba de conexión con Claude
 app.get("/claude", async (req, res) => {
   try {
-    const pregunta = req.query.pregunta || "Hola, ¿puedes presentarte brevemente?";
+    const pregunta =
+      req.query.pregunta || "Hola, ¿puedes presentarte brevemente?";
 
     const message = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
@@ -136,21 +137,6 @@ REGLAS IMPORTANTES:
   }
 });
 
-    res.json({
-      ok: true,
-      response: message.content[0].text
-    });
-
-  } catch (error) {
-    console.error("Error de Claude:", error);
-
-    res.status(500).json({
-      ok: false,
-      error: "No se pudo conectar con Claude."
-    });
-  }
-});
-
 // Verificación del Webhook de Meta
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
@@ -178,6 +164,7 @@ app.post("/webhook", (req, res) => {
   res.sendStatus(200);
 });
 
+// Iniciar servidor
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor ejecutándose en el puerto ${PORT}`);
 });
