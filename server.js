@@ -48,11 +48,13 @@ app.get("/models", async (req, res) => {
 // Prueba de conexión con Claude
 app.get("/claude", async (req, res) => {
   try {
-    const message = await anthropic.messages.create({
-  model: "claude-haiku-4-5-20251001",
-  max_tokens: 300,
+    const pregunta = req.query.pregunta || "Hola, ¿puedes presentarte brevemente?";
 
-  system: `
+    const message = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 300,
+
+      system: `
 Eres el asistente virtual de La Hacienda de Villa, un salón de eventos.
 
 Tu función es atender de manera amable, clara, natural y profesional a las personas interesadas en conocer o contratar el salón.
@@ -107,17 +109,31 @@ REGLAS IMPORTANTES:
 - No confirmes citas ni fechas por tu cuenta. Puedes ayudar a orientar al cliente para solicitar una visita, pero la confirmación final la realiza el equipo de La Hacienda de Villa.
 - Mantén las respuestas breves, cálidas, naturales y profesionales.
 - Adapta tus respuestas a lo que el cliente esté preguntando; no muestres toda la información de golpe.
-- Si el cliente pregunta por precios, proporciona las opciones correspondientes.
-- Si el cliente muestra interés en conocer el salón, invítalo a solicitar una visita con cita.
 - No menciones que eres una inteligencia artificial a menos que el cliente lo pregunte directamente.
 `,
 
-  messages: [
-    {
-      role: "user",
-      content: "Hola Claude, responde brevemente confirmando que estás conectado con el asistente de La Hacienda de Villa."
-    }
-  ]
+      messages: [
+        {
+          role: "user",
+          content: pregunta
+        }
+      ]
+    });
+
+    res.json({
+      ok: true,
+      pregunta: pregunta,
+      response: message.content[0].text
+    });
+
+  } catch (error) {
+    console.error("Error de Claude:", error);
+
+    res.status(500).json({
+      ok: false,
+      error: "No se pudo conectar con Claude."
+    });
+  }
 });
 
     res.json({
